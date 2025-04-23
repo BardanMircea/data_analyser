@@ -4,7 +4,7 @@ import os
 
 import matplotlib.pyplot as plt
 
-def analyze_csv(file_path, analysis_type, visualization_type, output_file):
+def analyze_csv(file_path, analysis_type, visualization_type, output_file, export_format):
     try:
         # Load the CSV file
         data = pd.read_csv(file_path)
@@ -48,7 +48,15 @@ def analyze_csv(file_path, analysis_type, visualization_type, output_file):
 
         # Save results to file
         if output_file:
-            result.to_csv(output_file)
+            if export_format == "csv":
+                result.to_csv(output_file, index=False)
+            elif export_format == "excel":
+                result.to_excel(output_file, index=False)
+            elif export_format == "json":
+                result.to_json(output_file, orient="records", lines=True)
+            else:
+                print(f"Error: Unsupported export format '{export_format}'.")
+                return
             print(f"Results saved to {output_file}")
 
     except Exception as e:
@@ -60,6 +68,8 @@ def main():
     parser.add_argument("analysis_type", choices=["summary", "time-series", "category"], help="Type of analysis to perform")
     parser.add_argument("visualization_type", choices=["line", "bar", "histogram"], help="Type of visualization to generate")
     parser.add_argument("--output", help="File path to save the analysis results", default=None)
+    parser.add_argument("--export-format", choices=["csv", "excel", "json"], default="csv",
+                        help="Format to export the analysis results (default: csv)")
 
     args = parser.parse_args()
 
@@ -67,7 +77,7 @@ def main():
         print("Error: File not found.")
         return
 
-    analyze_csv(args.file_path, args.analysis_type, args.visualization_type, args.output)
+    analyze_csv(args.file_path, args.analysis_type, args.visualization_type, args.output, args.export_format)
 
 if __name__ == "__main__":
     main()
